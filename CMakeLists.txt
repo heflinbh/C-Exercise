@@ -19,10 +19,15 @@ target_link_libraries(C_Exercise_P1 PRIVATE ZLIB::ZLIB)
 
 add_executable(C_Exercise_P2
         "Problem 2 - Roof Truss/main.cpp"
-        "Problem 2 - Roof Truss/GeometryCalculator.cpp"
-        "Problem 2 - Roof Truss/GeometryCalculator.h"
-        "Problem 2 - Roof Truss/Bay.cpp"
-        "Problem 2 - Roof Truss/Bay.h"
+        "Problem 2 - Roof Truss/BenCustomTrussConstraintProvider.cpp"
+        "Problem 2 - Roof Truss/BenCustomTrussConstraintProvider.h"
+        "Problem 2 - Roof Truss/ITrussConstraintProvider.h"
+        "Problem 2 - Roof Truss/TrussModels.h"
+        "Problem 2 - Roof Truss/GreedySingleMemberSolver.cpp"
+        "Problem 2 - Roof Truss/GreedySingleMemberSolver.h"
+        "Problem 2 - Roof Truss/ISingleMemberSolver.h"
+        "Problem 2 - Roof Truss/CuttingPlanner.cpp"
+        "Problem 2 - Roof Truss/CuttingPlanner.h"
 )
 
 enable_testing()

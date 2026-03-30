@@ -1,5 +1,14 @@
 #include <iostream>
-#include "GeometryCalculator.h"
+#include "BenCustomTrussConstraintProvider.h"
+#include "CuttingPlanner.h"
+
+namespace {
+    constexpr double pi = 3.14159265358979323846;
+
+    double degreesToRadians(double degrees) {
+        return degrees * pi / 180.0;
+    }
+}
 
 int main() {
     int trussSpanMm = 0;
@@ -21,13 +30,17 @@ int main() {
         return 1;
     }
 
-    GeometryCalculator calculator(trussSpanMm, roofAngleDegrees);
+    const double roofAngleRad = degreesToRadians(roofAngleDegrees);
 
-    std::cout << "\nCalculated geometry:\n";
-    std::cout << "Bottom length: " << calculator.getLengthOfBottomMm() << " mm\n";
-    std::cout << "Diagonal length (each side): " << calculator.getLengthOfDiagonalMm() << " mm\n";
-    std::cout << "Bottom bay length (5 bays): " << calculator.getBayLengthOfBottomMm() << " mm\n";
-    std::cout << "Diagonal bay length (3 bays/side): " << calculator.getBayLengthOfDiagonalMm() << " mm\n";
+    TrussInput input{trussSpanMm, roofAngleRad};
+
+    BenCustomTrussConstraintProvider provider;
+    TrussConstraints constraints = provider.build(input);
+
+    std::vector stock{600, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000};
+
+    CuttingPlanner planner(stock);
+    const CutPlan plan = planner.planGreedy(constraints);
 
     return 0;
 }
