@@ -13,7 +13,7 @@ public:
     SingleMemberSolution solve() const override;
 
 private:
-    MemberConstraints member;
+    MemberConstraints memberConstraints;
     std::vector<int> validatedStockLengthsMm;
 
     static std::vector<int> validateStockLengths(const std::vector<int>& providedStockLengthsMm);
@@ -28,6 +28,5 @@ private:
                                   int stockLengthMm,
                                   int bestStockLengthMm);
 };
-
 
 #endif // C_EXERCISE_GREEDYSINGLEMEMBERSOLVER_H

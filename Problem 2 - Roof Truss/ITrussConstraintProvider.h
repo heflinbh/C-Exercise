@@ -3,6 +3,10 @@
 
 #include "TrussModels.h"
 
+/**
+ * Interface for providers that generate TrussConstraints based on a given TrussInput.
+ * This allows for different truss designs and constraint generation logic to be implemented (once they exist).
+ */
 class ITrussConstraintProvider {
 public:
     virtual ~ITrussConstraintProvider() = default;

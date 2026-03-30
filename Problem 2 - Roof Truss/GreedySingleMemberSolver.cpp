@@ -1,11 +1,14 @@
 #include "GreedySingleMemberSolver.h"
-
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
 
-GreedySingleMemberSolver::GreedySingleMemberSolver(const MemberConstraints& member, const std::vector<int>& providedStockLengthsMm) {
-    this->validatedStockLengthsMm = validateStockLengths(providedStockLengthsMm);
+/**
+ * Produces a cutting solution for a single member of a truss using a greedy algorithm.
+ */
+GreedySingleMemberSolver::GreedySingleMemberSolver(const MemberConstraints& member, const std::vector<int>& providedStockLengthsMm)
+    : memberConstraints(member), validatedStockLengthsMm(validateStockLengths(providedStockLengthsMm)) {
+
     if (validatedStockLengthsMm.empty()) {
         throw std::invalid_argument("No valid stock lengths provided.");
     }
@@ -13,9 +16,11 @@ GreedySingleMemberSolver::GreedySingleMemberSolver(const MemberConstraints& memb
     if (member.memberLengthMm <= 0) {
         throw std::invalid_argument("Member required length must be greater than zero.");
     }
-    this->member = member;
 }
 
+/**
+ * Iteratively builds the member from the start (0 mm) to the end (member.memberLengthMm) by repeatedly selecting the best next cut based on the provided stock lengths and the member's join zones.
+ */
 SingleMemberSolution GreedySingleMemberSolver::solve() const {
     SingleMemberSolution solution;
     double builtToMm = 0.0;
@@ -43,7 +48,8 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
                 bestStockLengthMm = stockLengthMm;
                 bestNextBuiltToMm = candidateBuiltTo.value();
                 bestRequiredLengthMm = requiredLengthMm;
-                bestWasteMm = wasteMm;}
+                bestWasteMm = wasteMm;
+            }
         }
 
         if (!foundCandidate) {
@@ -64,10 +70,20 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
     return solution;
 }
 
+/**
+ * Determines if the member is complete based on how far along it has been built (builtToMm) compared to the total required length of the member.
+ */
 bool GreedySingleMemberSolver::memberIsComplete(double builtToMm) const {
-    return builtToMm >= member.memberLengthMm;
+    return builtToMm >= memberConstraints.memberLengthMm;
 }
 
+/**
+ * Finds the furthest legal endpoint along the member that can be reached from the current builtToMm using a stock piece of the given length.
+ *
+ * NOTE: This method assumes a "join clearance" of 10mm. This is to ensure that any subsequent joins have enough space to, well, join.
+ *
+ * Returns std::nullopt if no legal endpoint can be reached with the given stock length. This signifies that no solution is possible from the GreedySingleMemberSolver.
+ */
 std::optional<double> GreedySingleMemberSolver::findFurthestLegalEndpoint(double builtToMm, int stockLengthMm) const {
     constexpr double joinEndClearanceMm = 10.0;
 
@@ -75,7 +91,7 @@ std::optional<double> GreedySingleMemberSolver::findFurthestLegalEndpoint(double
         return std::nullopt;
     }
 
-    const double maxReachMm = std::min(member.memberLengthMm, builtToMm + static_cast<double>(stockLengthMm));
+    const double maxReachMm = std::min(memberConstraints.memberLengthMm, builtToMm + static_cast<double>(stockLengthMm));
     if (maxReachMm <= builtToMm) {
         return std::nullopt;
     }
@@ -83,12 +99,12 @@ std::optional<double> GreedySingleMemberSolver::findFurthestLegalEndpoint(double
     std::optional<double> furthest;
 
     // End of member is always legal if reachable (no clearance rule here).
-    if (member.memberLengthMm <= maxReachMm) {
-        furthest = member.memberLengthMm;
+    if (memberConstraints.memberLengthMm <= maxReachMm) {
+        furthest = memberConstraints.memberLengthMm;
     }
 
     // For join zones, keep 10 mm available for the subsequent piece.
-    for (const JoinZone& zone : member.joinZones) {
+    for (const JoinZone& zone : memberConstraints.joinZones) {
         if (zone.endMm <= builtToMm) {
             continue;
         }
@@ -114,6 +130,14 @@ std::optional<double> GreedySingleMemberSolver::findFurthestLegalEndpoint(double
     return furthest;
 }
 
+/**
+ * Determines if a candidate cut is better than the best found so far.
+ * Makes decisions based on the following criteria, in order of importance:
+ * 1. Lower waste is always better.
+ * 2. If waste is the same, a cut that builds further along the member is better.
+ * 3. If both waste and built-to point are the same, a cut using a shorter stock length is better (to preserve longer
+ * stock for later cuts).
+ */
 bool GreedySingleMemberSolver::isBetterCandidate(
     bool foundCandidate,
     double wasteMm,
@@ -154,4 +178,3 @@ std::vector<int> GreedySingleMemberSolver::validateStockLengths(const std::vecto
 
     return validatedStockLengths;
 }
-

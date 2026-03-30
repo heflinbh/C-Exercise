@@ -1,7 +1,6 @@
 #ifndef C_EXERCISE_BENCUSTOMTRUSSCONSTRAINTPROVIDER_H
 #define C_EXERCISE_BENCUSTOMTRUSSCONSTRAINTPROVIDER_H
 
-
 #include "ITrussConstraintProvider.h"
 #include <vector>
 
