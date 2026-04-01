@@ -196,8 +196,7 @@ TEST(BenXMLOutputTests, AppendsGzExtensionWhenMissing) {
     EXPECT_TRUE(fs::exists(expectedOutputPath));
 
     const std::string actual = ReadGzipFile(expectedOutputPath);
-    const std::string expected =
-        std::string("<") + tagNameA + ">" + someSimpleCharData + "</" + tagNameA + ">";
+    const std::string expected = std::string("<") + tagNameA + ">" + someSimpleCharData + "</" + tagNameA + ">";
     EXPECT_EQ(actual, expected);
 
     // Cleanup both names in case implementation wrote either one
@@ -219,8 +218,7 @@ TEST(BenXMLOutputTests, KeepsGzExtensionWhenAlreadyProvided) {
     EXPECT_TRUE(fs::exists(path));
 
     const std::string actual = ReadGzipFile(path);
-    const std::string expected =
-        std::string("<") + tagNameA + ">" + someSimpleCharData + "</" + tagNameA + ">";
+    const std::string expected = std::string("<") + tagNameA + ">" + someSimpleCharData + "</" + tagNameA + ">";
     EXPECT_EQ(actual, expected);
 
     std::remove(path);

@@ -25,6 +25,7 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
     SingleMemberSolution solution;
     double builtToMm = 0.0;
 
+    // Do this same thing until the member is completely solved.
     while (!memberIsComplete(builtToMm)) {
         bool foundCandidate = false;
         int bestStockLengthMm = 0;
@@ -32,10 +33,12 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
         double bestRequiredLengthMm = 0.0;
         double bestWasteMm = 0.0;
 
+        // For each stock length, find the furthest legal endpoint that can be reached from the current builtToMm.
+        // We then compare all candidates to find the best one based on "some criteria", which we define in isBetterCandidate().
         for (int stockLengthMm : validatedStockLengthsMm) {
-            const std::optional<double> candidateBuiltTo =
-                findFurthestLegalEndpoint(builtToMm, stockLengthMm);
 
+            // Check whether this stock length can make a valid next cut. If not, move on.
+            const std::optional<double> candidateBuiltTo = findFurthestLegalEndpoint(builtToMm, stockLengthMm);
             if (!candidateBuiltTo.has_value()) {
                 continue;
             }
@@ -43,6 +46,7 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
             const double requiredLengthMm = candidateBuiltTo.value() - builtToMm;
             const double wasteMm = static_cast<double>(stockLengthMm) - requiredLengthMm;
 
+            // We have a valid candidate cut, now check if it's better than the best found so far.
             if (isBetterCandidate(foundCandidate, wasteMm, bestWasteMm, candidateBuiltTo.value(), bestNextBuiltToMm, stockLengthMm, bestStockLengthMm)) {
                 foundCandidate = true;
                 bestStockLengthMm = stockLengthMm;
@@ -52,10 +56,12 @@ SingleMemberSolution GreedySingleMemberSolver::solve() const {
             }
         }
 
+        // This is where our code breaks, if it turns out there is no solution for a given geometry.
         if (!foundCandidate) {
             throw std::runtime_error("No valid next cut found. Cannot complete member with given stock lengths.");
         }
 
+        // Record the best cut found in the solution.
         solution.cutPlan.pieces.push_back(CutPiece {
             bestRequiredLengthMm,
             bestStockLengthMm,
